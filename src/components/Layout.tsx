@@ -1,8 +1,19 @@
-import React, { Component } from "react";
+import { Component, ReactNode } from "react";
 
-export class Layout extends Component {
+import Navbar from "./Navbar";
+
+interface Props {
+  children: ReactNode;
+}
+
+class Layout extends Component<Props> {
   render() {
-    return <div>Layout</div>;
+    return (
+      <div className="w-full h-screen overflow-auto flex flex-col">
+        <Navbar />
+        <div className="h-full p-3">{this.props.children}</div>
+      </div>
+    );
   }
 }
 
