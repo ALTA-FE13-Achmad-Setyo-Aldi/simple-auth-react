@@ -1,7 +1,6 @@
 import { Component } from "react";
-import Card from "../components/Card";
-
 import Layout from "../components/Layout"; // default import
+import Card from "../components/Card";
 import { Spinner } from "../components/Loading";
 import { UserType } from "../utils/types/user"; // named import
 
@@ -54,10 +53,10 @@ class Home extends Component<PropsType, StateType> {
   }
 
   fetchProfile() {}
-
   render() {
     return (
       <Layout>
+        {" "}
         <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
           {this.state.loading ? (
             <Spinner />
@@ -79,5 +78,4 @@ class Home extends Component<PropsType, StateType> {
     );
   }
 }
-
 export default Home;

@@ -10,12 +10,6 @@ interface Props {
 class Card extends Component<Props> {
   render() {
     const { image, username, first_name, last_name } = this.props;
-    /*
-    const image = this.props.image
-    const username = this.props.username
-    const first_name = this.props.first_name
-    const last_name = this.props.last_name
-    */
 
     return (
       <div className="flex flex-col items-center">
