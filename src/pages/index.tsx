@@ -1,85 +1,77 @@
-import { Component } from "react";
+import { FC, useState, useEffect } from "react";
 import axios from "axios";
 
 import { Spinner } from "../components/Loading";
 import Layout from "../components/Layout"; // default import
 import Card from "../components/Card";
 import { UserType } from "../utils/types/user"; // named import
+import { useTitle, useFetchGet } from "../utils/hooks";
+import Button from "../components/Button";
 
-interface PropsType {}
+const Home: FC = () => {
+  const [datas, setDatas] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refresh, setRefresh] = useState<boolean>(true);
+  const [data] = useFetchGet(
+    "https://virtserver.swaggerhub.com/devanada/hells-kitchen/1.1.0/users"
+  );
+  useTitle("Homepage | User Management");
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-interface StateType {
-  datas: UserType[];
-  loading: boolean;
-}
-
-class Home extends Component<PropsType, StateType> {
-  constructor(props: PropsType) {
-    super(props);
-    this.state = {
-      datas: [],
-      loading: true,
-    };
-  }
-
-  componentDidMount(): void {
-    this.fetchData();
-  }
-
-  fetchData() {
+  function fetchData() {
     axios
       .get("users")
       .then((response) => {
         const { data } = response.data;
-        this.setState({ datas: data });
+        setDatas(data);
       })
       .catch((error) => {
         console.log(error);
         alert(error.toString());
       })
-      .finally(() => this.setState({ loading: false }));
+      .finally(() => setLoading(false));
   }
 
-  fetchAlternative() {
+  function fetchAlternative() {
     fetch(
       "https://virtserver.swaggerhub.com/devanada/hells-kitchen/1.1.0/users"
     )
       .then((result) => result.json())
       .then((response) => {
         const { data } = response;
-        this.setState({ datas: data });
         console.log(data);
       })
       .catch((error) => {
         console.log(error);
         alert(error.toString());
       })
-      .finally(() => this.setState({ loading: false }));
+      .finally(() => setLoading(false));
   }
 
-  render() {
-    return (
-      <Layout>
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-          {this.state.loading ? (
-            <Spinner />
-          ) : (
-            this.state.datas.map((data, index) => {
-              return (
-                <Card
-                  key={data.id}
-                  first_name={data.first_name}
-                  last_name={data.last_name}
-                  username={data.username}
-                  image={data.image}
-                />
-              );
-            })
-          )}
-        </div>
-      </Layout>
-    );
-  }
-}
+  return (
+    <Layout>
+      <Button label="Submit" onClick={() => setRefresh(!refresh)} />
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+        {loading ? (
+          <Spinner />
+        ) : (
+          datas.map((data, index) => {
+            return (
+              <Card
+                key={data.id}
+                first_name={data.first_name}
+                last_name={data.last_name}
+                username={data.username}
+                image={data.image}
+              />
+            );
+          })
+        )}
+      </div>
+    </Layout>
+  );
+};
 
 export default Home;
