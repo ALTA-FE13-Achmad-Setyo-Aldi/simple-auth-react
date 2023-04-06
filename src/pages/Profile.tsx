@@ -1,19 +1,29 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import withReactContent from "sweetalert2-react-content";
+import { useSelector } from "react-redux/es/exports";
+import { useCookies } from "react-cookie";
+import { Link, useNavigate } from "react-router-dom";
 
 import Layout from "../components/Layout";
+import { RootState } from "../utils/types/redux";
 import { useTitle } from "../utils/hooks";
 import { UserEdit } from "../utils/types/user";
 import Button from "../components/Button";
 import { Input } from "../components/Input";
+import Swal from "../utils/swal";
 
 const Profile: FC = () => {
+  const { token, uname } = useSelector((state: RootState) => state.data);
   const [objSubmit, setObjSubmit] = useState<Partial<UserEdit>>({});
   const [data, setData] = useState<Partial<UserEdit>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const params = useParams();
+  const MySwal = withReactContent(Swal);
+  const [, , removeCookie] = useCookies();
+  const navigate = useNavigate();
   useTitle("Profile | User Management");
 
   useEffect(() => {
@@ -52,17 +62,60 @@ const Profile: FC = () => {
       .put("users", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       })
       .then((response) => {
-        const { data } = response;
+        const { message } = response.data;
+        MySwal.fire({
+          title: "Success",
+          text: message,
+          showCancelButton: false,
+        });
         setIsEdit(false);
+        setObjSubmit({});
       })
       .catch((error) => {
-        alert(error.toString());
+        const { data } = error.response;
+        MySwal.fire({
+          title: "Failed",
+          text: data.message,
+          showCancelButton: false,
+        });
       })
       .finally(() => fetchData());
   }
+
+  const handleDeleteAccount = () => {
+    axios
+      .delete("/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        const { message } = response.data;
+        MySwal.fire({
+          title: "Success",
+          text: message,
+          showCancelButton: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            removeCookie("tkn");
+            removeCookie("uname");
+            navigate("/");
+          }
+        });
+      })
+      .catch((error) => {
+        const { data } = error.response;
+        MySwal.fire({
+          title: "Failed",
+          text: data.message,
+          showCancelButton: false,
+        });
+      });
+  };
 
   const handleEditMode = () => {
     setIsEdit(!isEdit);
@@ -85,6 +138,7 @@ const Profile: FC = () => {
                 if (!event.currentTarget.files) {
                   return;
                 }
+                // setImage(URL.createObjectURL(event.currentTarget.files[0]));
                 setData({
                   ...data,
                   image: URL.createObjectURL(event.currentTarget.files[0]),
@@ -107,11 +161,6 @@ const Profile: FC = () => {
               }
             />
             <Input
-              placeholder="Username"
-              defaultValue={data.username}
-              onChange={(event) => handleChange(event.target.value, "username")}
-            />
-            <Input
               placeholder="Password"
               defaultValue={data.password}
               onChange={(event) => handleChange(event.target.value, "password")}
@@ -128,7 +177,20 @@ const Profile: FC = () => {
         )}
       </div>
 
-      <Button label="Edit Profile" id="button-edit" onClick={handleEditMode} />
+      {uname === params.username && (
+        <>
+          <Button
+            label="Edit Profile"
+            id="button-edit"
+            onClick={() => setIsEdit(!isEdit)}
+          />
+          <Button
+            label="Delete Account"
+            id="button-delete"
+            onClick={() => handleDeleteAccount()}
+          />
+        </>
+      )}
     </Layout>
   );
 };

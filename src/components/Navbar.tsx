@@ -3,16 +3,46 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaChevronDown,
+  FaMoon,
+  FaSun,
 } from "react-icons/fa";
+import withReactContent from "sweetalert2-react-content";
 import { Menu, Transition } from "@headlessui/react";
-import { Link } from "react-router-dom";
-import { FC, Fragment } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FC, Fragment, useContext } from "react";
+import { useSelector } from "react-redux";
+import { useCookies } from "react-cookie";
 
-import withRouter, { NavigateParam } from "../utils/navigation";
+import { RootState } from "../utils/types/redux";
+import { ThemeContext } from "../utils/context";
+import Swal from "../utils/swal";
 
-const Navbar: FC<NavigateParam> = (props) => {
+const Navbar: FC = () => {
+  const { uname, isLoggedIn } = useSelector((state: RootState) => state.data);
+  const { theme, setTheme } = useContext(ThemeContext);
+  // [get, set, delete] = useCookies()
+  const [, , removeCookie] = useCookies();
+  const MySwal = withReactContent(Swal);
+  const navigate = useNavigate();
+
+  function handleTheme(mode: string) {
+    setTheme(mode);
+  }
+
+  function handleLogout() {
+    MySwal.fire({
+      title: "Logout",
+      text: "Are you sure?",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        removeCookie("tkn");
+        removeCookie("uname");
+      }
+    });
+  }
+
   return (
-    <nav className="bg-neutral-200 w-full h-14 flex items-center p-3 justify-between">
+    <nav className="bg-neutral-200 dark:bg-gray-700 w-full h-14 flex items-center p-3 justify-between">
       <Link className="font-bold" to="/" id="nav-homepage">
         Homepage
       </Link>
@@ -36,17 +66,39 @@ const Navbar: FC<NavigateParam> = (props) => {
         >
           <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
+              {isLoggedIn && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      className={`${
+                        active ? "bg-violet-500 text-white" : "text-gray-900"
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                      onClick={() => navigate(`/profile/${uname}`)}
+                      id="nav-profile"
+                    >
+                      <FaUserCircle className="h-5 mr-2 w-5" />
+                      Profile
+                    </button>
+                  )}
+                </Menu.Item>
+              )}
               <Menu.Item>
                 {({ active }) => (
                   <button
                     className={`${
                       active ? "bg-violet-500 text-white" : "text-gray-900"
-                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                    onClick={() => props.navigate(`/profile/testing`)}
+                    } group flex w-full items-center rounded-md px-2 py-2 text-sm capitalize`}
+                    onClick={() =>
+                      handleTheme(theme === "dark" ? "light" : "dark")
+                    }
                     id="nav-profile"
                   >
-                    <FaUserCircle className="h-5 mr-2 w-5" />
-                    Profile
+                    {theme === "dark" ? (
+                      <FaSun className="h-5 mr-2 w-5" />
+                    ) : (
+                      <FaMoon className="h-5 mr-2 w-5" />
+                    )}
+                    {theme} Mode
                   </button>
                 )}
               </Menu.Item>
@@ -58,11 +110,22 @@ const Navbar: FC<NavigateParam> = (props) => {
                     className={`${
                       active ? "bg-violet-500 text-white" : "text-gray-900"
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                    onClick={() => props.navigate("/login")}
+                    onClick={() =>
+                      isLoggedIn ? handleLogout() : navigate("/login")
+                    }
                     id="nav-login"
                   >
-                    <FaSignInAlt className="h-5 mr-2 w-5" />
-                    Login
+                    {isLoggedIn ? (
+                      <>
+                        <FaSignOutAlt className="h-5 mr-2 w-5" />
+                        Logout
+                      </>
+                    ) : (
+                      <>
+                        <FaSignInAlt className="h-5 mr-2 w-5" />
+                        Login
+                      </>
+                    )}
                   </button>
                 )}
               </Menu.Item>
@@ -74,4 +137,4 @@ const Navbar: FC<NavigateParam> = (props) => {
   );
 };
 
-export default withRouter(Navbar);
+export default Navbar;

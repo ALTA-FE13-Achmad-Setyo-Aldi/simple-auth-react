@@ -2,11 +2,16 @@ import { FC, FormEvent, useEffect, useState } from "react";
 import Image from "../../assets/react.svg";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import withReactContent from "sweetalert2-react-content";
+import { useCookies } from "react-cookie";
+import { useDispatch } from "react-redux";
 
 import Layout from "../../components/Layout";
 import { Input } from "../../components/Input";
 import Button from "../../components/Button";
 import { useTitle } from "../../utils/hooks";
+import { handleAuth } from "../../utils/redux/reducers/reducer";
+import Swal from "../../utils/swal";
 
 interface ObjSubmitType {
   username: string;
@@ -19,11 +24,16 @@ const Login: FC = () => {
     password: "",
   });
   const [isDisabled, setIsDisabled] = useState(true);
+  const MySwal = withReactContent(Swal);
+  const [, setCookie] = useCookies();
   const navigate = useNavigate();
   useTitle("Login | User Management");
 
   useEffect(() => {
-    const isEmpty = Object.values(objSubmit).every((val) => val === "");
+    const isEmpty = Object.values(objSubmit).every((val) => {
+      return val !== "";
+    });
+    setIsDisabled(!isEmpty);
   }, [objSubmit]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -32,12 +42,26 @@ const Login: FC = () => {
     axios
       .post("login", objSubmit)
       .then((response) => {
-        const { data } = response;
-        alert(data.message);
-        navigate("/");
+        const { data, message } = response.data;
+        MySwal.fire({
+          title: "Success",
+          text: message,
+          showCancelButton: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setCookie("tkn", data.token);
+            setCookie("uname", data.username);
+            navigate("/");
+          }
+        });
       })
       .catch((error) => {
-        alert(error.toString());
+        const { data } = error.response;
+        MySwal.fire({
+          title: "Failed",
+          text: data.message,
+          showCancelButton: false,
+        });
       })
       .finally(() => setIsDisabled(false));
   }

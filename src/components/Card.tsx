@@ -10,12 +10,6 @@ interface Props {
 
 const Card: FC<Props> = (props) => {
   const { image, username, first_name, last_name } = props;
-  /*
-    const image = props.image
-    const username = props.username
-    const first_name = props.first_name
-    const last_name = props.last_name
-    */
 
   return (
     <div className="flex flex-col items-center">

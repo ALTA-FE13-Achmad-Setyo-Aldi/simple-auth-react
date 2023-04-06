@@ -3,10 +3,10 @@ import axios from "axios";
 
 import { Spinner } from "../components/Loading";
 import Layout from "../components/Layout"; // default import
+import Button from "../components/Button";
 import Card from "../components/Card";
 import { UserType } from "../utils/types/user"; // named import
 import { useTitle, useFetchGet } from "../utils/hooks";
-import Button from "../components/Button";
 
 const Home: FC = () => {
   const [datas, setDatas] = useState<UserType[]>([]);
@@ -52,7 +52,6 @@ const Home: FC = () => {
 
   return (
     <Layout>
-      <Button label="Submit" onClick={() => setRefresh(!refresh)} />
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
         {loading ? (
           <Spinner />
