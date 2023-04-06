@@ -5,3 +5,6 @@ export interface UserType {
     username: string;
     image: string;
 }
+export interface UserEdit extends UserType {
+    password: string;
+}
