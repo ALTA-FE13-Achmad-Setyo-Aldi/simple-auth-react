@@ -22,7 +22,7 @@ Untuk Tugas Kali ini, saya membagi tiap release di masing - masing branch yang b
     - [x] Add a function on login page to store JWT using cookies or localstorage
     - [x] Create a protected route that when user already logged in, they can’t access login and register page
     - [x] Use Functional Components & Hooks
-5. Release 5 (Poin+)
+5. Release 5 (Poin+) di branch main atau release-five
     - [x] Add dark mode feature to add more good user experience on your website
     - [x] Deploy your website on netlify or vercel and write the link of your deployed website on your readme.md
 
